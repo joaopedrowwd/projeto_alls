@@ -21,11 +21,13 @@ def create_app():
     from .auth import bp as auth_bp
     from .admin import bp as admin_bp
     from .carrinho import bp as carrinho_bp
+    from .cliente import bp as cliente_bp
     
     app.register_blueprint(carrinho_bp)
     app.register_blueprint(loja_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(cliente_bp)
 
     from .models import UNIDADES_POR_PACOTE
 

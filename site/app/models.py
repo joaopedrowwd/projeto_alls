@@ -8,6 +8,11 @@ from .extensions import db, login_manager
 UNIDADES_POR_PACOTE = 100
 
 STATUS_PEDIDO = ["Pago", "Em separação", "Enviado", "Entregue", "Cancelado"]
+FRETES = {
+    "Retirada": {"valor": 0, "prazo": "Retire na indústria, sem custo"},
+    "Padrão": {"valor": 4000, "prazo": "5 a 8 dias úteis"},
+    "Expresso": {"valor": 5000, "prazo": "2 a 3 dias úteis"},
+}
 
 # Todos os valores em dinheiro são guardados em CENTAVOS (inteiro).
 # Evita erro de arredondamento e o aviso do SQLite sobre Decimal.

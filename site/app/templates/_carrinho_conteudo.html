@@ -44,10 +44,10 @@
   </div>
   <p class="text-xs text-gray-500">Frete calculado no checkout.</p>
   <!-- Dia 6: vira link para o checkout -->
-  <button type="button" disabled
-          class="w-full bg-gray-900 text-white py-3 rounded disabled:bg-gray-300 disabled:cursor-not-allowed">
+  <a href="{{ url_for('cliente.checkout') }}"
+     class="block w-full text-center bg-gray-900 text-white py-3 rounded hover:bg-gray-700">
     Finalizar compra
-  </button>
+  </a>
 </div>
 
 {% else %}

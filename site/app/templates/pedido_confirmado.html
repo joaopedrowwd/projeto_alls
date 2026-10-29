@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Pedido confirmado{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="bg-green-100 border border-green-300 text-green-800 rounded p-6 text-center mb-6">
+    <p class="text-3xl mb-2">✓</p>
+    <h1 class="text-2xl font-bold">Pedido confirmado!</h1>
+    <p class="mt-1">Pedido #{{ '%05d'|format(pedido.id) }} · {{ pedido.criado_em.strftime('%d/%m/%Y %H:%M') }}</p>
+  </div>
+
+  <div class="bg-white shadow rounded p-6 space-y-6">
+    <div class="grid sm:grid-cols-2 gap-4 text-sm">
+      <div>
+        <p class="text-gray-500">Status</p>
+        <p class="font-semibold">{{ pedido.status }}</p>
+      </div>
+      <div>
+        <p class="text-gray-500">Entrega</p>
+        <p class="font-semibold">{{ pedido.entrega }}</p>
+      </div>
+      <div class="sm:col-span-2">
+        <p class="text-gray-500">Endereço</p>
+        <p class="font-semibold">{{ pedido.endereco }}</p>
+      </div>
+    </div>
+
+    <ul class="divide-y text-sm border-t">
+      {% for item in pedido.itens %}
+      <li class="py-3 flex justify-between gap-3">
+        <span>
+          {{ item.variante.produto.nome }} · {{ item.variante.cor }}
+          <span class="block text-gray-500">
+            {{ item.pacotes }} {{ 'pacote' if item.pacotes == 1 else 'pacotes' }}
+            × {{ item.preco_pacote|brl }} ({{ item.pacotes * UNIDADES_POR_PACOTE }} un.)
+          </span>
+        </span>
+        <span class="font-medium whitespace-nowrap">{{ (item.pacotes * item.preco_pacote)|brl }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <div class="border-t pt-4 space-y-2 text-sm">
+      <div class="flex justify-between"><span>Subtotal</span><span>{{ (pedido.total - pedido.frete)|brl }}</span></div>
+      <div class="flex justify-between">
+        <span>Frete</span><span>{{ 'Grátis' if pedido.frete == 0 else pedido.frete|brl }}</span>
+      </div>
+      <div class="flex justify-between text-lg font-bold pt-2 border-t">
+        <span>Total</span><span>{{ pedido.total|brl }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dia 7: link para "Meus pedidos" -->
+  <div class="text-center mt-6">
+    <a href="{{ url_for('loja.catalogo') }}" class="underline">Continuar comprando</a>
+  </div>
+</div>
+{% endblock %}

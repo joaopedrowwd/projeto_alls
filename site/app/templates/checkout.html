@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Finalizar compra{% endblock %}
+
+{% macro campo(nome, rotulo, valor, classe, attrs) %}
+<div class="{{ classe }}">
+  <label for="{{ nome }}" class="block text-sm font-medium mb-1">{{ rotulo }}</label>
+  <input type="text" id="{{ nome }}" name="{{ nome }}" value="{{ valor }}" {{ attrs|safe }}
+         class="w-full border border-gray-300 rounded px-3 py-2">
+</div>
+{% endmacro %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Finalizar compra</h1>
+
+<form method="post" id="form-checkout" class="grid lg:grid-cols-3 gap-8" data-subtotal="{{ carrinho.total }}">
+  <input type="hidden" name="subtotal_visto" value="{{ carrinho.total }}">
+
+  <div class="lg:col-span-2 space-y-8">
+
+    <section class="bg-white shadow rounded p-6">
+      <h2 class="text-lg font-semibold mb-4">Forma de entrega</h2>
+      <div class="space-y-3">
+        {% for nome, f in fretes.items() %}
+        <label class="flex items-center gap-3 border rounded p-3 cursor-pointer has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50">
+          <input type="radio" name="entrega" value="{{ nome }}" data-frete="{{ f.valor }}" required
+                 {% if form.entrega == nome %}checked{% endif %}>
+          <span class="flex-1">
+            <span class="font-medium">{{ nome }}</span>
+            <span class="block text-sm text-gray-600">{{ f.prazo }}</span>
+          </span>
+          <span class="font-semibold">{{ 'Grátis' if f.valor == 0 else f.valor|brl }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section id="bloco-endereco" class="bg-white shadow rounded p-6">
+      <h2 class="text-lg font-semibold mb-4">Endereço de entrega</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-6 gap-4">
+        {{ campo('cep', 'CEP', form.cep, 'sm:col-span-2', 'required inputmode=numeric maxlength=9 placeholder=00000-000') }}
+        {{ campo('rua', 'Rua', form.rua, 'sm:col-span-4', 'required maxlength=80') }}
+        {{ campo('numero', 'Número', form.numero, 'sm:col-span-2', 'required maxlength=10') }}
+        {{ campo('complemento', 'Complemento (opcional)', form.complemento, 'sm:col-span-4', 'maxlength=40') }}
+        {{ campo('bairro', 'Bairro', form.bairro, 'sm:col-span-3', 'required maxlength=50') }}
+        {{ campo('cidade', 'Cidade', form.cidade, 'sm:col-span-2', 'required maxlength=50') }}
+        {{ campo('uf', 'UF', form.uf, 'sm:col-span-1', 'required maxlength=2 placeholder=SP') }}
+      </div>
+    </section>
+
+  </div>
+
+  <aside class="bg-white shadow rounded p-6 h-fit lg:sticky lg:top-6">
+    <h2 class="text-lg font-semibold mb-4">Resumo do pedido</h2>
+
+    <ul class="divide-y text-sm">
+      {% for item in carrinho.itens %}
+      <li class="py-3 flex justify-between gap-3">
+        <span>
+          {{ item.produto.nome }} · {{ item.variante.cor }}
+          <span class="block text-gray-500">
+            {{ item.pacotes }} {{ 'pacote' if item.pacotes == 1 else 'pacotes' }} ({{ item.unidades }} un.)
+          </span>
+        </span>
+        <span class="font-medium whitespace-nowrap">{{ item.subtotal|brl }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <div class="border-t mt-2 pt-4 space-y-2 text-sm">
+      <div class="flex justify-between"><span>Subtotal</span><span>{{ carrinho.total|brl }}</span></div>
+      <div class="flex justify-between"><span>Frete</span><span id="resumo-frete"></span></div>
+      <div class="flex justify-between text-lg font-bold pt-2 border-t">
+        <span>Total</span><span id="resumo-total"></span>
+      </div>
+    </div>
+
+    <button type="submit" id="btn-pagar"
+            class="mt-6 w-full bg-green-600 text-white py-3 rounded font-semibold hover:bg-green-700 disabled:bg-gray-300">
+      Pagar
+    </button>
+    <p class="text-xs text-gray-500 mt-3">Pagamento simulado: nenhuma cobrança real será feita.</p>
+  </aside>
+</form>
+
+<script>
+  const form = document.getElementById('form-checkout');
+  const subtotal = Number(form.dataset.subtotal);        // centavos
+  const bloco = document.getElementById('bloco-endereco');
+  const freteEl = document.getElementById('resumo-frete');
+  const totalEl = document.getElementById('resumo-total');
+  const btnPagar = document.getElementById('btn-pagar');
+
+  const brl = (centavos) =>
+    (centavos / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  function atualizar() {
+    const sel = form.querySelector('input[name="entrega"]:checked');
+    const frete = sel ? Number(sel.dataset.frete) : 0;
+    const retirada = !!sel && sel.value === 'Retirada';
+
+    freteEl.textContent = sel ? (frete === 0 ? 'Grátis' : brl(frete)) : 'Escolha a entrega';
+    totalEl.textContent = brl(subtotal + frete);
+
+    // Retirada não precisa de endereço
+    bloco.classList.toggle('hidden', retirada);
+    bloco.querySelectorAll('input').forEach((i) => { i.disabled = retirada; });
+  }
+
+  form.addEventListener('change', atualizar);
+  form.addEventListener('submit', () => { btnPagar.disabled = true; });  // evita clique duplo
+  atualizar();
+</script>
+{% endblock %}
