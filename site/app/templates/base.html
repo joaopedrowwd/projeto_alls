@@ -11,14 +11,43 @@
   <nav class="bg-white shadow">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
       <a href="{{ url_for('loja.index') }}" class="text-xl font-bold">Canetas</a>
-      <!-- Dia 3: Olá, nome / login / logout -->
-      <!-- Dia 5: botão do carrinho (drawer) -->
-      <!-- Dia 8: sino do admin -->
-      <div></div>
+
+      <div class="flex items-center gap-4 text-sm">
+        <!-- Dia 8: sino do admin -->
+        <!-- Dia 5: botão do carrinho (drawer) -->
+        {% if current_user.is_authenticated %}
+          <span>Olá, {{ current_user.nome.split()[0] }}</span>
+          {% if current_user.is_admin %}
+            <a href="{{ url_for('admin.painel') }}" class="hover:underline">Admin</a>
+          {% endif %}
+          <a href="{{ url_for('auth.logout') }}" class="hover:underline">Sair</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="hover:underline">Entrar</a>
+          <a href="{{ url_for('auth.cadastro') }}"
+             class="bg-gray-900 text-white px-3 py-1.5 rounded hover:bg-gray-700">Cadastrar</a>
+        {% endif %}
+      </div>
     </div>
   </nav>
 
   <main class="max-w-6xl mx-auto px-4 py-8">
+    {% set cores = {
+      'success': 'bg-green-100 text-green-800 border-green-300',
+      'error': 'bg-red-100 text-red-800 border-red-300',
+      'warning': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      'info': 'bg-blue-100 text-blue-800 border-blue-300',
+      'message': 'bg-blue-100 text-blue-800 border-blue-300'
+    } %}
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+      {% if mensagens %}
+        <div class="mb-6 space-y-2">
+          {% for categoria, texto in mensagens %}
+            <div class="border rounded px-4 py-3 {{ cores.get(categoria, cores['message']) }}">{{ texto }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
     {% block content %}{% endblock %}
   </main>
 

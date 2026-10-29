@@ -1,8 +1,9 @@
 from datetime import datetime
 
+from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .extensions import db
+from .extensions import db, login_manager
 
 UNIDADES_POR_PACOTE = 100
 
@@ -12,7 +13,7 @@ STATUS_PEDIDO = ["Pago", "Em separação", "Enviado", "Entregue", "Cancelado"]
 # Evita erro de arredondamento e o aviso do SQLite sobre Decimal.
 
 
-class Usuario(db.Model):
+class Usuario(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -30,6 +31,10 @@ class Usuario(db.Model):
     @property
     def is_admin(self):
         return self.role == "admin"
+
+@login_manager.user_loader
+def carregar_usuario(user_id):
+    return db.session.get(Usuario, int(user_id))
 
 
 class Produto(db.Model):

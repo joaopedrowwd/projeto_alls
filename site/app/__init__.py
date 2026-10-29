@@ -2,7 +2,7 @@ import os
 from flask import Flask
 from dotenv import load_dotenv
 
-from .extensions import db
+from .extensions import db, login_manager
 
 load_dotenv()
 
@@ -13,9 +13,15 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///loja.db"
 
     db.init_app(app)
-    from . import models  # noqa: F401  (registra as tabelas)
+    login_manager.init_app(app)
+    from . import models  # noqa: F401  (registra as tabelas e o user_loader)
 
     from .loja import bp as loja_bp
+    from .auth import bp as auth_bp
+    from .admin import bp as admin_bp
+
     app.register_blueprint(loja_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
 
     return app
