@@ -1,10 +1,12 @@
+from datetime import datetime, time
 from functools import wraps
 from flask import (Blueprint, abort, flash, jsonify, redirect,
                    render_template, request, url_for)
 from flask_login import current_user, login_required
+from sqlalchemy import func
 
 from ..extensions import db
-from ..models import STATUS_PEDIDO, Pedido, Variante
+from ..models import STATUS_PEDIDO, ItemPedido, Pedido, Produto, Variante
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -22,7 +24,90 @@ def admin_required(f):
 @bp.route("/painel")
 @admin_required
 def painel():
-    return redirect(url_for("admin.pedidos"))
+    hoje_inicio = datetime.combine(datetime.now().date(), time.min)
+
+    # Pedidos válidos (não cancelados)
+    pedidos_validos = Pedido.query.filter(Pedido.status != "Cancelado").all()
+    pedidos_hoje = [p for p in pedidos_validos if p.criado_em and p.criado_em >= hoje_inicio]
+
+    faturamento_total = sum(p.total for p in pedidos_validos)
+    faturamento_hoje = sum(p.total for p in pedidos_hoje)
+    ticket_medio = (faturamento_total // len(pedidos_validos)) if pedidos_validos else 0
+
+    # Contagem por status
+    contagem_status = {st: 0 for st in STATUS_PEDIDO}
+    for p in Pedido.query.all():
+        contagem_status[p.status] = contagem_status.get(p.status, 0) + 1
+
+    pendentes_envio = contagem_status.get("Pago", 0) + contagem_status.get("Em separação", 0)
+    nao_lidos = Pedido.query.filter_by(lido_admin=False).count()
+
+    # Variantes com estoque baixo (<= 10 pacotes)
+    estoque_baixo = (
+        Variante.query
+        .join(Produto)
+        .filter(Variante.estoque <= 10)
+        .order_by(Variante.estoque.asc(), Produto.nome.asc())
+        .all()
+    )
+
+    # Top 5 produtos/cores mais vendidos (em pacotes, ignorando cancelados)
+    mais_vendidos = (
+        db.session.query(
+            Variante,
+            func.coalesce(func.sum(ItemPedido.pacotes), 0).label("pacotes_vendidos"),
+        )
+        .join(ItemPedido, ItemPedido.variante_id == Variante.id)
+        .join(Pedido, Pedido.id == ItemPedido.pedido_id)
+        .filter(Pedido.status != "Cancelado")
+        .group_by(Variante.id)
+        .order_by(func.sum(ItemPedido.pacotes).desc())
+        .limit(5)
+        .all()
+    )
+
+    ultimos_pedidos = (
+        Pedido.query
+        .order_by(Pedido.criado_em.desc(), Pedido.id.desc())
+        .limit(5)
+        .all()
+    )
+
+    return render_template(
+        "admin/dashboard.html",
+        pedidos_hoje_qtd=len(pedidos_hoje),
+        pedidos_total_qtd=len(pedidos_validos),
+        faturamento_hoje=faturamento_hoje,
+        faturamento_total=faturamento_total,
+        ticket_medio=ticket_medio,
+        pendentes_envio=pendentes_envio,
+        nao_lidos=nao_lidos,
+        contagem_status=contagem_status,
+        estoque_baixo=estoque_baixo,
+        mais_vendidos=mais_vendidos,
+        ultimos_pedidos=ultimos_pedidos,
+    )
+
+
+@bp.route("/estoque/<int:variante_id>", methods=["POST"])
+@admin_required
+def ajustar_estoque(variante_id):
+    variante = db.session.get(Variante, variante_id) or abort(404)
+    try:
+        novo_estoque = int(request.form.get("estoque", ""))
+        if novo_estoque < 0:
+            raise ValueError
+    except ValueError:
+        flash("Informe uma quantidade de estoque válida (0 ou mais).", "error")
+        return redirect(request.referrer or url_for("admin.painel"))
+
+    variante.estoque = novo_estoque
+    db.session.commit()
+    flash(
+        f"Estoque de {variante.produto.nome} ({variante.cor}) atualizado para {novo_estoque} pacotes.",
+        "success",
+    )
+    return redirect(request.referrer or url_for("admin.painel"))
 
 @bp.route("/pedidos")
 @admin_required

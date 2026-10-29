@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template
 from dotenv import load_dotenv
 from .utils import COR_HEX, brl, imagem_url
 
@@ -33,5 +33,23 @@ def create_app():
     app.jinja_env.globals["COR_HEX"] = COR_HEX
     app.jinja_env.globals["UNIDADES_POR_PACOTE"] = UNIDADES_POR_PACOTE
     app.jinja_env.globals["imagem_url"] = imagem_url
+
+    @app.errorhandler(403)
+    def erro_403(_e):
+        return render_template(
+            "erro.html",
+            codigo=403,
+            titulo="Acesso restrito",
+            mensagem="Você não tem permissão para acessar esta área.",
+        ), 403
+
+    @app.errorhandler(404)
+    def erro_404(_e):
+        return render_template(
+            "erro.html",
+            codigo=404,
+            titulo="Página não encontrada",
+            mensagem="O endereço que você tentou acessar não existe ou foi removido.",
+        ), 404
 
     return app

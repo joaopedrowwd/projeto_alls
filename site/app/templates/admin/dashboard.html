@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Admin · Dashboard{% endblock %}
+
+{% set cores_status = {
+  'Pago': 'bg-blue-100 text-blue-800 border-blue-200',
+  'Em separação': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  'Enviado': 'bg-purple-100 text-purple-800 border-purple-200',
+  'Entregue': 'bg-green-100 text-green-800 border-green-200',
+  'Cancelado': 'bg-red-100 text-red-800 border-red-200'
+} %}
+
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-2xl font-bold">Dashboard do Administrador</h1>
+    <p class="text-sm text-gray-600">Visão geral de vendas, pedidos do dia e controle de estoque.</p>
+  </div>
+  <div class="flex items-center gap-3">
+    {% if nao_lidos > 0 %}
+      <a href="{{ url_for('admin.pedidos', status='nao_lidos') }}"
+         class="bg-red-600 text-white text-sm px-4 py-2 rounded font-medium hover:bg-red-700">
+        {{ nao_lidos }} {{ 'pedido novo' if nao_lidos == 1 else 'pedidos novos' }}
+      </a>
+    {% endif %}
+    <a href="{{ url_for('admin.pedidos') }}"
+       class="bg-gray-900 text-white text-sm px-4 py-2 rounded font-medium hover:bg-gray-700">
+      Gerenciar todos os pedidos →
+    </a>
+  </div>
+</div>
+
+<!-- Cartões de resumo -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <div class="bg-white shadow rounded p-5 border-l-4 border-green-600">
+    <p class="text-xs uppercase tracking-wider text-gray-500 font-semibold">Faturamento de hoje</p>
+    <p class="text-2xl font-bold mt-1">{{ faturamento_hoje|brl }}</p>
+    <p class="text-xs text-gray-500 mt-1">{{ pedidos_hoje_qtd }} {{ 'pedido hoje' if pedidos_hoje_qtd == 1 else 'pedidos hoje' }}</p>
+  </div>
+
+  <div class="bg-white shadow rounded p-5 border-l-4 border-gray-900">
+    <p class="text-xs uppercase tracking-wider text-gray-500 font-semibold">Faturamento acumulado</p>
+    <p class="text-2xl font-bold mt-1">{{ faturamento_total|brl }}</p>
+    <p class="text-xs text-gray-500 mt-1">{{ pedidos_total_qtd }} {{ 'pedido válido' if pedidos_total_qtd == 1 else 'pedidos válidos' }}</p>
+  </div>
+
+  <div class="bg-white shadow rounded p-5 border-l-4 border-blue-600">
+    <p class="text-xs uppercase tracking-wider text-gray-500 font-semibold">Ticket médio</p>
+    <p class="text-2xl font-bold mt-1">{{ ticket_medio|brl }}</p>
+    <p class="text-xs text-gray-500 mt-1">Valor médio por pedido</p>
+  </div>
+
+  <div class="bg-white shadow rounded p-5 border-l-4 border-yellow-500">
+    <p class="text-xs uppercase tracking-wider text-gray-500 font-semibold">Aguardando envio</p>
+    <p class="text-2xl font-bold mt-1">{{ pendentes_envio }}</p>
+    <p class="text-xs text-gray-500 mt-1">Pagos ou em separação</p>
+  </div>
+</section>
+
+<!-- Resumo por status -->
+<section class="bg-white shadow rounded p-5 mb-8">
+  <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500 mb-3">Pedidos por status</h2>
+  <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+    {% for st, qtd in contagem_status.items() %}
+    <a href="{{ url_for('admin.pedidos', status=st) }}"
+       class="border rounded p-3 hover:bg-gray-50 transition flex items-center justify-between">
+      <span class="text-xs font-semibold px-2 py-0.5 rounded border {{ cores_status.get(st, 'bg-gray-100') }}">{{ st }}</span>
+      <span class="text-lg font-bold">{{ qtd }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<div class="grid lg:grid-cols-2 gap-8">
+  <!-- Últimos pedidos -->
+  <section class="bg-white shadow rounded p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-bold">Últimos pedidos</h2>
+      <a href="{{ url_for('admin.pedidos') }}" class="text-sm underline text-gray-600 hover:text-gray-900">Ver todos</a>
+    </div>
+
+    {% if not ultimos_pedidos %}
+      <p class="text-sm text-gray-500 py-4">Nenhum pedido registrado ainda.</p>
+    {% else %}
+      <ul class="divide-y text-sm">
+        {% for p in ultimos_pedidos %}
+        <li class="py-3 flex items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold">#{{ '%05d'|format(p.id) }}</span>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded border {{ cores_status.get(p.status, 'bg-gray-100') }}">
+                {{ p.status }}
+              </span>
+              {% if not p.lido_admin %}
+                <span class="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">NOVO</span>
+              {% endif %}
+            </div>
+            <p class="text-xs text-gray-500 mt-0.5">
+              {{ p.usuario.nome if p.usuario else 'Cliente #' ~ p.usuario_id }} · {{ p.criado_em.strftime('%d/%m/%Y %H:%M') }}
+            </p>
+          </div>
+          <span class="font-bold whitespace-nowrap">{{ p.total|brl }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+
+  <!-- Mais vendidos e Alerta de Estoque Baixo -->
+  <div class="space-y-8">
+    <section class="bg-white shadow rounded p-6">
+      <h2 class="text-lg font-bold mb-4">Cores mais vendidas</h2>
+      {% if not mais_vendidos %}
+        <p class="text-sm text-gray-500">Ainda não há vendas concluídas.</p>
+      {% else %}
+        <ul class="divide-y text-sm">
+          {% for variante, pct_vendidos in mais_vendidos %}
+          <li class="py-2.5 flex items-center justify-between gap-3">
+            <span>
+              <span class="font-medium">{{ variante.produto.nome }}</span> · {{ variante.cor }}
+              <span class="text-xs text-gray-500 block">Estoque atual: {{ variante.estoque }} pacotes</span>
+            </span>
+            <span class="font-bold bg-gray-100 px-2.5 py-1 rounded text-xs">
+              {{ pct_vendidos }} {{ 'pacote vendido' if pct_vendidos == 1 else 'pacotes vendidos' }}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+
+    <section class="bg-white shadow rounded p-6">
+      <h2 class="text-lg font-bold mb-1">Alerta de estoque baixo (≤ 10 pacotes)</h2>
+      <p class="text-xs text-gray-500 mb-4">Reposição rápida de pacotes por cor.</p>
+
+      {% if not estoque_baixo %}
+        <p class="text-sm text-green-700 bg-green-50 border border-green-200 rounded p-3">
+          Todas as 72 variantes estão com estoque saudável (acima de 10 pacotes).
+        </p>
+      {% else %}
+        <ul class="divide-y text-sm">
+          {% for v in estoque_baixo %}
+          <li class="py-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span class="font-medium">{{ v.produto.nome }} · {{ v.cor }}</span>
+              <span class="block text-xs {{ 'text-red-600 font-bold' if v.estoque == 0 else 'text-yellow-700' }}">
+                {{ 'ESGOTADO (0 pacotes)' if v.estoque == 0 else v.estoque ~ ' pacotes restantes' }}
+              </span>
+            </div>
+            <form method="post" action="{{ url_for('admin.ajustar_estoque', variante_id=v.id) }}"
+                  class="flex items-center gap-2">
+              <input type="number" name="estoque" value="{{ v.estoque }}" min="0" max="9999"
+                     class="w-20 border border-gray-300 rounded px-2 py-1 text-sm text-right">
+              <button type="submit"
+                      class="bg-gray-900 text-white text-xs px-3 py-1.5 rounded hover:bg-gray-700 font-medium">
+                Atualizar
+              </button>
+            </form>
+          </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}
