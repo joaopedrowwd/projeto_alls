@@ -1,10 +1,219 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="text-center py-16">
-  <h1 class="text-4xl font-bold mb-4">Canetas direto da indústria</h1>
-  <p class="text-gray-600 mb-8">Vendas em pacotes de 100 unidades, em 9 cores.</p>
-  <a href="{{ url_for('loja.catalogo') }}"
-     class="bg-gray-900 text-white px-6 py-3 rounded hover:bg-gray-700">Ver catálogo</a>
-</section>
+<div class="space-y-20 pb-12">
+
+  <!-- HERO SECTION -->
+  <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-700 via-red-600 to-red-800 text-white shadow-xl border border-red-500/30">
+    <!-- Elementos decorativos de fundo -->
+    <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-red-950/30 blur-2xl pointer-events-none"></div>
+
+    <div class="relative z-10 px-6 py-16 sm:px-12 sm:py-20 lg:py-24 grid lg:grid-cols-12 gap-10 items-center">
+      <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+        <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/25 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider">
+          <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+          Atacado fabril · Pronta entrega
+        </div>
+
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+          Canetas direto da indústria
+        </h1>
+
+        <p class="text-red-100 text-lg sm:text-xl max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+          Vendas em pacotes de 100 unidades, com alto padrão de escrita, durabilidade comprovada e preços exclusivos de fábrica para o seu negócio.
+        </p>
+
+        <div class="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4">
+          <a href="{{ url_for('loja.catalogo') }}"
+             class="inline-flex items-center gap-2 bg-white text-red-700 font-bold px-8 py-4 rounded-xl shadow-lg hover:bg-red-50 hover:scale-[1.02] transition-all">
+            Ver catálogo completo
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+            </svg>
+          </a>
+          <a href="#como-funciona"
+             class="inline-flex items-center gap-2 bg-red-800/50 hover:bg-red-800/80 text-white border border-white/25 font-semibold px-6 py-4 rounded-xl transition-colors">
+            Como funciona
+          </a>
+        </div>
+
+        <!-- Selos rápidos -->
+        <div class="pt-6 border-t border-white/15 grid grid-cols-3 gap-4 text-left max-w-lg mx-auto lg:mx-0">
+          <div>
+            <p class="text-2xl sm:text-3xl font-extrabold">9</p>
+            <p class="text-xs text-red-100">Modelos exclusivos</p>
+          </div>
+          <div>
+            <p class="text-2xl sm:text-3xl font-extrabold">8</p>
+            <p class="text-xs text-red-100">Cores por modelo</p>
+          </div>
+          <div>
+            <p class="text-2xl sm:text-3xl font-extrabold">100 un.</p>
+            <p class="text-xs text-red-100">Por pacote fechado</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card visual de destaque no lado direito -->
+      <div class="lg:col-span-5">
+        <div class="bg-white text-gray-900 rounded-2xl p-6 sm:p-8 shadow-2xl border border-red-100 space-y-5">
+          <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-red-600">Padrão Industrial</span>
+              <h2 class="text-xl font-bold text-gray-900 mt-0.5">Lote fechado de 100 unidades</h2>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>
+              </svg>
+            </div>
+          </div>
+
+          <ul class="space-y-3 text-sm text-gray-600">
+            <li class="flex items-center gap-3">
+              <span class="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xs font-bold">✓</span>
+              Estoque atualizado em tempo real por cor
+            </li>
+            <li class="flex items-center gap-3">
+              <span class="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xs font-bold">✓</span>
+              Ponta de alta precisão e secagem rápida
+            </li>
+            <li class="flex items-center gap-3">
+              <span class="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xs font-bold">✓</span>
+              Opção de retirada grátis na indústria ou envio rápido
+            </li>
+          </ul>
+
+          <!-- Paleta demonstrativa -->
+          <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2.5">Disponível em diversas cores</p>
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-full bg-blue-600 ring-2 ring-offset-2 ring-blue-600/30" title="Azul"></span>
+              <span class="w-6 h-6 rounded-full bg-gray-900 ring-2 ring-offset-2 ring-gray-900/30" title="Preta"></span>
+              <span class="w-6 h-6 rounded-full bg-red-600 ring-2 ring-offset-2 ring-red-600/30" title="Vermelha"></span>
+              <span class="w-6 h-6 rounded-full bg-green-600 ring-2 ring-offset-2 ring-green-600/30" title="Verde"></span>
+              <span class="w-6 h-6 rounded-full bg-purple-600 ring-2 ring-offset-2 ring-purple-600/30" title="Roxa"></span>
+              <span class="w-6 h-6 rounded-full bg-pink-500 ring-2 ring-offset-2 ring-pink-500/30" title="Rosa"></span>
+              <span class="w-6 h-6 rounded-full bg-orange-500 ring-2 ring-offset-2 ring-orange-500/30" title="Laranja"></span>
+              <span class="w-6 h-6 rounded-full bg-cyan-500 ring-2 ring-offset-2 ring-cyan-500/30" title="Turquesa"></span>
+            </div>
+          </div>
+
+          <a href="{{ url_for('loja.catalogo') }}"
+             class="block w-full text-center bg-red-600 text-white font-semibold py-3.5 rounded-xl hover:bg-red-700 transition-colors shadow-sm">
+            Escolher modelos e cores
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIFERENCIAIS / VANTAGENS -->
+  <section class="space-y-10">
+    <div class="text-center max-w-2xl mx-auto space-y-2">
+      <span class="text-xs font-bold uppercase tracking-widest text-red-600">Por que comprar conosco</span>
+      <h2 class="text-3xl font-extrabold text-gray-900">Qualidade industrial sem intermediários</h2>
+      <p class="text-gray-600 text-sm sm:text-base">
+        Abasteça sua papelaria, escritório ou empresa comprando direto de quem fabrica.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-red-100 hover:border-red-300 hover:shadow-md transition-all">
+        <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">Pacotes de 100 unidades</h3>
+        <p class="text-sm text-gray-600 leading-relaxed">
+          Padronização ideal para revenda e uso corporativo em larga escala, garantindo o menor custo por unidade.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-red-100 hover:border-red-300 hover:shadow-md transition-all">
+        <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">72 combinações no catálogo</h3>
+        <p class="text-sm text-gray-600 leading-relaxed">
+          São 9 linhas de canetas com 8 cores vibrantes cada. Monte seu pedido mesclando diferentes modelos e cores no mesmo carrinho.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-red-100 hover:border-red-300 hover:shadow-md transition-all">
+        <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+            <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">Logística flexível e transparente</h3>
+        <p class="text-sm text-gray-600 leading-relaxed">
+          Escolha entre Retirada grátis direto na indústria, envio Padrão ou Expresso, e acompanhe o status do pedido online.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section id="como-funciona" class="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-red-100">
+    <div class="text-center max-w-xl mx-auto mb-10">
+      <span class="text-xs font-bold uppercase tracking-widest text-red-600">Passo a passo</span>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">Seu pedido faturado em minutos</h2>
+    </div>
+
+    <div class="grid sm:grid-cols-3 gap-8">
+      <div class="relative text-center space-y-3">
+        <div class="w-12 h-12 rounded-full bg-red-600 text-white font-extrabold text-lg flex items-center justify-center mx-auto shadow-md shadow-red-600/20">
+          1
+        </div>
+        <h3 class="font-bold text-gray-900">Escolha o modelo e a cor</h3>
+        <p class="text-sm text-gray-600">
+          Navegue pelo catálogo, selecione a cor desejada e defina a quantidade de pacotes de 100 unidades.
+        </p>
+      </div>
+
+      <div class="relative text-center space-y-3">
+        <div class="w-12 h-12 rounded-full bg-red-600 text-white font-extrabold text-lg flex items-center justify-center mx-auto shadow-md shadow-red-600/20">
+          2
+        </div>
+        <h3 class="font-bold text-gray-900">Revise no carrinho lateral</h3>
+        <p class="text-sm text-gray-600">
+          Adicione quantas cores quiser sem sair da página e confira o cálculo automático de unidades e subtotais.
+        </p>
+      </div>
+
+      <div class="relative text-center space-y-3">
+        <div class="w-12 h-12 rounded-full bg-red-600 text-white font-extrabold text-lg flex items-center justify-center mx-auto shadow-md shadow-red-600/20">
+          3
+        </div>
+        <h3 class="font-bold text-gray-900">Finalize e acompanhe</h3>
+        <p class="text-sm text-gray-600">
+          Defina a forma de entrega, confirme o pagamento e acompanhe cada etapa da separação até a entrega.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="bg-red-50 border border-red-200 rounded-3xl p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="space-y-2 text-center md:text-left">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">Pronto para abastecer seu estoque?</h2>
+      <p class="text-gray-600 text-sm sm:text-base">
+        Confira todos os modelos disponíveis na nossa linha de produção agora mesmo.
+      </p>
+    </div>
+    <a href="{{ url_for('loja.catalogo') }}"
+       class="whitespace-nowrap bg-red-600 text-white font-bold px-8 py-4 rounded-xl shadow-md hover:bg-red-700 transition-colors">
+      Ver catálogo agora →
+    </a>
+  </section>
+
+</div>
 {% endblock %}
