@@ -18,6 +18,9 @@
 
         {% if current_user.is_authenticated %}
           <span>Olá, {{ current_user.nome.split()[0] }}</span>
+          <a href="{{ url_for('cliente.meus_pedidos') }}" class="text-sm text-gray-700 hover:text-gray-900 font-medium">
+          Meus pedidos
+        </a>
           {% if current_user.is_admin %}
             <a href="{{ url_for('admin.painel') }}" class="hover:underline">Admin</a>
           {% endif %}

@@ -104,3 +104,15 @@ def pedido_confirmado(pedido_id):
     if not pedido or (pedido.usuario_id != current_user.id and not current_user.is_admin):
         abort(404)
     return render_template("pedido_confirmado.html", pedido=pedido)
+
+
+@bp.route("/meus-pedidos")
+@login_required
+def meus_pedidos():
+    pedidos = (
+        Pedido.query
+        .filter_by(usuario_id=current_user.id)
+        .order_by(Pedido.criado_em.desc(), Pedido.id.desc())
+        .all()
+    )
+    return render_template("meus_pedidos.html", pedidos=pedidos)

@@ -51,9 +51,14 @@
     </div>
   </div>
 
-  <!-- Dia 7: link para "Meus pedidos" -->
-  <div class="text-center mt-6">
-    <a href="{{ url_for('loja.catalogo') }}" class="underline">Continuar comprando</a>
+  <div class="flex items-center justify-center gap-6 mt-6">
+    <a href="{{ url_for('cliente.meus_pedidos') }}"
+       class="bg-gray-900 text-white px-5 py-2.5 rounded hover:bg-gray-700 font-medium">
+      Ver meus pedidos
+    </a>
+    <a href="{{ url_for('loja.catalogo') }}" class="underline text-gray-700 hover:text-gray-900">
+      Continuar comprando
+    </a>
   </div>
 </div>
 {% endblock %}

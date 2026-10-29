@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Meus pedidos{% endblock %}
+
+{% set cores_status = {
+  'Pago': 'bg-blue-100 text-blue-800 border-blue-200',
+  'Em separação': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  'Enviado': 'bg-purple-100 text-purple-800 border-purple-200',
+  'Entregue': 'bg-green-100 text-green-800 border-green-200',
+  'Cancelado': 'bg-red-100 text-red-800 border-red-200'
+} %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold">Meus pedidos</h1>
+  <a href="{{ url_for('loja.catalogo') }}" class="text-sm underline text-gray-600 hover:text-gray-900">
+    Ir para o catálogo
+  </a>
+</div>
+
+{% if not pedidos %}
+  <div class="bg-white shadow rounded p-8 text-center">
+    <p class="text-gray-600 mb-4">Você ainda não fez nenhum pedido.</p>
+    <a href="{{ url_for('loja.catalogo') }}"
+       class="inline-block bg-gray-900 text-white px-5 py-2.5 rounded hover:bg-gray-700">
+      Ver catálogo
+    </a>
+  </div>
+{% else %}
+  <div class="space-y-4">
+    {% for pedido in pedidos %}
+    <article class="bg-white shadow rounded p-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+        <div>
+          <div class="flex items-center gap-3">
+            <h2 class="text-lg font-bold">Pedido #{{ '%05d'|format(pedido.id) }}</h2>
+            <span class="text-xs font-semibold px-2.5 py-0.5 rounded border {{ cores_status.get(pedido.status, 'bg-gray-100 text-gray-800 border-gray-200') }}">
+              {{ pedido.status }}
+            </span>
+          </div>
+          <p class="text-sm text-gray-500 mt-1">
+            Realizado em {{ pedido.criado_em.strftime('%d/%m/%Y às %H:%M') }} · Entrega: {{ pedido.entrega }}
+          </p>
+        </div>
+
+        <div class="text-right">
+          <p class="text-xs text-gray-500">Total</p>
+          <p class="text-lg font-bold">{{ pedido.total|brl }}</p>
+        </div>
+      </div>
+
+      <ul class="divide-y text-sm my-3">
+        {% for item in pedido.itens %}
+        <li class="py-2 flex justify-between gap-3">
+          <span>
+            {{ item.variante.produto.nome }} · {{ item.variante.cor }}
+            <span class="text-gray-500">
+              — {{ item.pacotes }} {{ 'pacote' if item.pacotes == 1 else 'pacotes' }} ({{ item.pacotes * UNIDADES_POR_PACOTE }} un.)
+            </span>
+          </span>
+          <span class="font-medium whitespace-nowrap">{{ (item.pacotes * item.preco_pacote)|brl }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <div class="border-t pt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-gray-600">
+        <span class="truncate max-w-xl" title="{{ pedido.endereco }}">
+          <strong class="text-gray-700">Endereço:</strong> {{ pedido.endereco }}
+        </span>
+        <a href="{{ url_for('cliente.pedido_confirmado', pedido_id=pedido.id) }}"
+           class="font-medium text-gray-900 underline hover:text-gray-600 whitespace-nowrap">
+          Ver recibo completo →
+        </a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}
