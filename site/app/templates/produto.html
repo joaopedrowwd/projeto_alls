@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}{{ produto.nome }}{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('loja.catalogo') }}" class="text-sm underline">&larr; Voltar ao catálogo</a>
+
+<div class="grid md:grid-cols-2 gap-8 mt-4">
+
+  <!-- Foto: troca conforme a cor (hover ou seleção) -->
+  <div class="bg-white shadow rounded p-4">
+    <div class="relative aspect-square flex items-center justify-center overflow-hidden">
+      <span id="sem-foto" class="hidden text-2xl font-bold text-gray-300">{{ produto.nome }}</span>
+      <img id="foto" src="" alt="{{ produto.nome }}" class="hidden w-full h-full object-contain">
+    </div>
+  </div>
+
+  <div>
+    <h1 class="text-3xl font-bold">{{ produto.nome }}</h1>
+    <p class="text-2xl font-bold mt-2">{{ produto.preco_pacote|brl }}
+      <span class="text-sm font-normal text-gray-600">por pacote de {{ UNIDADES_POR_PACOTE }} un.</span>
+    </p>
+    <p class="text-gray-700 mt-4">{{ produto.descricao }}</p>
+
+    <form id="form-compra" class="mt-6 space-y-6"
+          data-preco="{{ produto.preco_pacote }}" data-unidades="{{ UNIDADES_POR_PACOTE }}">
+
+      <fieldset>
+        <legend class="font-medium">Cor: <span id="cor-selecionada" class="font-normal"></span></legend>
+        <div class="flex flex-wrap gap-3 mt-2">
+          {% for v in variantes %}
+          <label class="swatch {% if v.estoque == 0 %}opacity-30 cursor-not-allowed{% else %}cursor-pointer{% endif %}">
+            <input type="radio" name="variante_id" value="{{ v.id }}" class="sr-only peer"
+                   data-cor="{{ v.cor }}" data-estoque="{{ v.estoque }}"
+                   data-img="{{ imagem_url(produto.slug, v.cor) or '' }}"
+                   {% if v.estoque == 0 %}disabled{% endif %}
+                   {% if padrao and v.id == padrao.id %}checked{% endif %}>
+            <span class="block w-12 h-12 rounded border border-gray-300 shadow
+                         peer-checked:ring-2 peer-checked:ring-offset-2 peer-checked:ring-gray-900"
+                  style="background-color: {{ COR_HEX.get(v.cor, '#999999') }}"
+                  title="{{ v.cor }}{% if v.estoque == 0 %} (esgotado){% endif %}"></span>
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <div>
+        <label for="pacotes" class="font-medium block mb-2">Quantidade de pacotes</label>
+        <div class="flex items-center gap-2">
+          <button type="button" id="menos" class="w-10 h-10 border rounded text-xl hover:bg-gray-100">−</button>
+          <input type="number" id="pacotes" name="pacotes" value="1" min="1"
+                 class="w-20 h-10 border border-gray-300 rounded text-center">
+          <button type="button" id="mais" class="w-10 h-10 border rounded text-xl hover:bg-gray-100">+</button>
+        </div>
+        <p id="resumo" class="text-sm text-gray-600 mt-2"></p>
+        <p id="estoque-info" class="text-sm text-gray-500"></p>
+      </div>
+
+      <div class="border-t pt-4">
+        <p class="text-gray-600 text-sm">Subtotal</p>
+        <p id="subtotal" class="text-2xl font-bold"></p>
+      </div>
+
+      <!-- Dia 5: vira POST para o carrinho e o botão deixa de ser disabled -->
+      <button type="button" id="btn-adicionar" disabled
+              class="w-full bg-gray-900 text-white py-3 rounded hover:bg-gray-700
+                     disabled:bg-gray-300 disabled:cursor-not-allowed">
+        Adicionar ao carrinho
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById('form-compra');
+  const preco = Number(form.dataset.preco);        // centavos
+  const unidades = Number(form.dataset.unidades);
+  const qtd = document.getElementById('pacotes');
+  const corLabel = document.getElementById('cor-selecionada');
+  const resumo = document.getElementById('resumo');
+  const estoqueInfo = document.getElementById('estoque-info');
+  const subtotal = document.getElementById('subtotal');
+  const foto = document.getElementById('foto');
+  const semFoto = document.getElementById('sem-foto');
+
+  const brl = (centavos) =>
+    (centavos / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  function mostrarFoto(url) {
+    if (url) {
+      foto.src = url;
+      foto.classList.remove('hidden');
+      semFoto.classList.add('hidden');
+    } else {
+      foto.classList.add('hidden');
+      semFoto.classList.remove('hidden');
+    }
+  }
+
+  function atualizar() {
+    const sel = form.querySelector('input[name="variante_id"]:checked');
+    if (!sel) {
+      mostrarFoto('');
+      corLabel.textContent = 'esgotado';
+      resumo.textContent = '';
+      estoqueInfo.textContent = 'Este modelo está sem estoque no momento.';
+      subtotal.textContent = brl(0);
+      qtd.disabled = true;
+      return;
+    }
+    const estoque = Number(sel.dataset.estoque);
+    let n = parseInt(qtd.value, 10) || 1;
+    n = Math.max(1, Math.min(n, estoque));
+    qtd.value = n;
+    qtd.max = estoque;
+
+    mostrarFoto(sel.dataset.img);
+    corLabel.textContent = sel.dataset.cor;
+    resumo.textContent = `${n} ${n === 1 ? 'pacote' : 'pacotes'} = ${n * unidades} unidades`;
+    estoqueInfo.textContent = `${estoque} pacotes em estoque nesta cor`;
+    subtotal.textContent = brl(n * preco);
+  }
+
+  // Passar o mouse: mostra a foto e o nome da cor; ao sair, volta para a cor selecionada
+  form.querySelectorAll('.swatch').forEach((label) => {
+    const input = label.querySelector('input');
+    label.addEventListener('mouseenter', () => {
+      mostrarFoto(input.dataset.img);
+      corLabel.textContent = input.dataset.cor;
+    });
+    label.addEventListener('mouseleave', () => {
+      const sel = form.querySelector('input[name="variante_id"]:checked');
+      mostrarFoto(sel ? sel.dataset.img : '');
+      corLabel.textContent = sel ? sel.dataset.cor : 'esgotado';
+    });
+  });
+
+  // Pré-carrega as fotos para a troca não piscar
+  form.querySelectorAll('input[data-img]').forEach((i) => {
+    if (i.dataset.img) new Image().src = i.dataset.img;
+  });
+
+  form.addEventListener('change', atualizar);
+  qtd.addEventListener('input', atualizar);
+  document.getElementById('menos').addEventListener('click', () => { qtd.value = (parseInt(qtd.value, 10) || 1) - 1; atualizar(); });
+  document.getElementById('mais').addEventListener('click', () => { qtd.value = (parseInt(qtd.value, 10) || 1) + 1; atualizar(); });
+  atualizar();
+</script>
+{% endblock %}

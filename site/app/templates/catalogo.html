@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Catálogo{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Catálogo</h1>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  {% for produto in produtos %}
+  <a href="{{ url_for('loja.produto', slug=produto.slug) }}"
+     class="bg-white shadow rounded p-4 hover:shadow-lg transition">
+      {% set img = imagem_url(produto.slug) %}
+    <div class="aspect-square bg-white rounded flex items-center justify-center overflow-hidden">
+      {% if img %}
+        <img src="{{ img }}" alt="{{ produto.nome }}" class="w-full h-full object-contain">
+      {% else %}
+        <span class="text-2xl font-bold text-gray-300">{{ produto.nome }}</span>
+      {% endif %}
+    </div>
+    <h2 class="text-lg font-semibold mt-4">{{ produto.nome }}</h2>
+    <p class="text-gray-600 text-sm">Pacote com {{ UNIDADES_POR_PACOTE }} unidades</p>
+    <p class="text-xl font-bold mt-2">{{ produto.preco_pacote|brl }}</p>
+  </a>
+  {% else %}
+  <p class="text-gray-600">Nenhum produto cadastrado. Rode o <code>seed.py</code>.</p>
+  {% endfor %}
+</div>
+{% endblock %}

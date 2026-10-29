@@ -15,6 +15,7 @@
       <div class="flex items-center gap-4 text-sm">
         <!-- Dia 8: sino do admin -->
         <!-- Dia 5: botão do carrinho (drawer) -->
+        <a href="{{ url_for('loja.catalogo') }}" class="hover:underline">Catálogo</a> 
         {% if current_user.is_authenticated %}
           <span>Olá, {{ current_user.nome.split()[0] }}</span>
           {% if current_user.is_admin %}

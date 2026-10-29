@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 from dotenv import load_dotenv
+from .utils import COR_HEX, brl, imagem_url
 
 from .extensions import db, login_manager
 
@@ -23,5 +24,12 @@ def create_app():
     app.register_blueprint(loja_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
+
+    from .models import UNIDADES_POR_PACOTE
+
+    app.add_template_filter(brl, "brl")
+    app.jinja_env.globals["COR_HEX"] = COR_HEX
+    app.jinja_env.globals["UNIDADES_POR_PACOTE"] = UNIDADES_POR_PACOTE
+    app.jinja_env.globals["imagem_url"] = imagem_url
 
     return app
