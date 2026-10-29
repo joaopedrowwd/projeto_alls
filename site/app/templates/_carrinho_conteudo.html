@@ -1,0 +1,58 @@
+{% if carrinho.itens %}
+<ul class="flex-1 overflow-y-auto divide-y px-4">
+  {% for item in carrinho.itens %}
+  {% set v = item.variante %}
+  {% set img = imagem_url(item.produto.slug, v.cor) %}
+  <li class="py-4 flex gap-3">
+    <div class="w-16 h-16 shrink-0 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
+      {% if img %}
+        <img src="{{ img }}" alt="" class="w-full h-full object-contain">
+      {% else %}
+        <span class="text-xs text-gray-400">{{ item.produto.nome }}</span>
+      {% endif %}
+    </div>
+
+    <div class="flex-1 min-w-0">
+      <a href="{{ url_for('loja.produto', slug=item.produto.slug) }}" class="font-medium hover:underline">{{ item.produto.nome }}</a>
+      <p class="text-sm text-gray-600">{{ v.cor }} · {{ item.produto.preco_pacote|brl }}/pacote</p>
+      <p class="text-sm text-gray-600">
+        {{ item.pacotes }} {{ 'pacote' if item.pacotes == 1 else 'pacotes' }} = {{ item.unidades }} unidades
+      </p>
+
+      <div class="flex items-center gap-2 mt-2">
+        <button type="button" data-acao="menos" data-variante="{{ v.id }}" data-pacotes="{{ item.pacotes - 1 }}"
+                {% if item.pacotes <= 1 %}disabled{% endif %}
+                class="w-8 h-8 border rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed">−</button>
+        <span class="w-8 text-center">{{ item.pacotes }}</span>
+        <button type="button" data-acao="mais" data-variante="{{ v.id }}" data-pacotes="{{ item.pacotes + 1 }}"
+                {% if item.pacotes >= v.estoque %}disabled{% endif %}
+                class="w-8 h-8 border rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed">+</button>
+        <button type="button" data-acao="remover" data-variante="{{ v.id }}"
+                class="ml-auto text-sm text-red-600 hover:underline">Remover</button>
+      </div>
+    </div>
+
+    <p class="font-semibold whitespace-nowrap">{{ item.subtotal|brl }}</p>
+  </li>
+  {% endfor %}
+</ul>
+
+<div class="border-t p-4 space-y-3">
+  <div class="flex justify-between text-lg font-bold">
+    <span>Total</span>
+    <span>{{ carrinho.total|brl }}</span>
+  </div>
+  <p class="text-xs text-gray-500">Frete calculado no checkout.</p>
+  <!-- Dia 6: vira link para o checkout -->
+  <button type="button" disabled
+          class="w-full bg-gray-900 text-white py-3 rounded disabled:bg-gray-300 disabled:cursor-not-allowed">
+    Finalizar compra
+  </button>
+</div>
+
+{% else %}
+<div class="flex-1 flex flex-col items-center justify-center text-center p-6 text-gray-500">
+  <p class="mb-4">Seu carrinho está vazio.</p>
+  <a href="{{ url_for('loja.catalogo') }}" class="underline">Ver catálogo</a>
+</div>
+{% endif %}

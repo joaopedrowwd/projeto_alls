@@ -20,7 +20,9 @@ def create_app():
     from .loja import bp as loja_bp
     from .auth import bp as auth_bp
     from .admin import bp as admin_bp
-
+    from .carrinho import bp as carrinho_bp
+    
+    app.register_blueprint(carrinho_bp)
     app.register_blueprint(loja_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)

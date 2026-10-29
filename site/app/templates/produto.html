@@ -61,7 +61,7 @@
       </div>
 
       <!-- Dia 5: vira POST para o carrinho e o botão deixa de ser disabled -->
-      <button type="button" id="btn-adicionar" disabled
+         <button type="button" id="btn-adicionar"
               class="w-full bg-gray-900 text-white py-3 rounded hover:bg-gray-700
                      disabled:bg-gray-300 disabled:cursor-not-allowed">
         Adicionar ao carrinho
@@ -81,6 +81,7 @@
   const subtotal = document.getElementById('subtotal');
   const foto = document.getElementById('foto');
   const semFoto = document.getElementById('sem-foto');
+  const btnAdd = document.getElementById('btn-adicionar');
 
   const brl = (centavos) =>
     (centavos / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -105,9 +106,11 @@
       estoqueInfo.textContent = 'Este modelo está sem estoque no momento.';
       subtotal.textContent = brl(0);
       qtd.disabled = true;
+      btnAdd.disabled = true;
       return;
     }
     const estoque = Number(sel.dataset.estoque);
+    btnAdd.disabled = false;
     let n = parseInt(qtd.value, 10) || 1;
     n = Math.max(1, Math.min(n, estoque));
     qtd.value = n;
@@ -143,6 +146,13 @@
   qtd.addEventListener('input', atualizar);
   document.getElementById('menos').addEventListener('click', () => { qtd.value = (parseInt(qtd.value, 10) || 1) - 1; atualizar(); });
   document.getElementById('mais').addEventListener('click', () => { qtd.value = (parseInt(qtd.value, 10) || 1) + 1; atualizar(); });
+  btnAdd.addEventListener('click', async () => {
+    const sel = form.querySelector('input[name="variante_id"]:checked');
+    if (!sel) return;
+    btnAdd.disabled = true;
+    const dados = await CarrinhoAPI.adicionar(sel.value, qtd.value);
+    btnAdd.disabled = false;
+  });
   atualizar();
 </script>
 {% endblock %}

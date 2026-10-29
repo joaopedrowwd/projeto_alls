@@ -13,9 +13,9 @@
       <a href="{{ url_for('loja.index') }}" class="text-xl font-bold">Canetas</a>
 
       <div class="flex items-center gap-4 text-sm">
+        <a href="{{ url_for('loja.catalogo') }}" class="hover:underline">Catálogo</a>
         <!-- Dia 8: sino do admin -->
-        <!-- Dia 5: botão do carrinho (drawer) -->
-        <a href="{{ url_for('loja.catalogo') }}" class="hover:underline">Catálogo</a> 
+
         {% if current_user.is_authenticated %}
           <span>Olá, {{ current_user.nome.split()[0] }}</span>
           {% if current_user.is_admin %}
@@ -27,6 +27,18 @@
           <a href="{{ url_for('auth.cadastro') }}"
              class="bg-gray-900 text-white px-3 py-1.5 rounded hover:bg-gray-700">Cadastrar</a>
         {% endif %}
+
+        <button type="button" id="carrinho-abrir" aria-label="Abrir carrinho"
+                class="relative p-1.5 text-gray-800 hover:text-gray-500 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-7 h-7"
+               fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8" cy="21" r="1"/>
+            <circle cx="19" cy="21" r="1"/>
+            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+          </svg>
+          <span id="carrinho-contador"
+                class="{% if carrinho.contador == 0 %}hidden{% endif %} absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-5 h-5 px-1 flex items-center justify-center">{{ carrinho.contador }}</span>
+        </button>
       </div>
     </div>
   </nav>
@@ -52,5 +64,30 @@
     {% block content %}{% endblock %}
   </main>
 
+  <!-- Carrinho lateral -->
+  <div id="carrinho-overlay" class="fixed inset-0 bg-black/40 hidden z-40"></div>
+  <aside id="carrinho-drawer"
+         class="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-xl z-50 translate-x-full transition-transform duration-300 flex flex-col"
+         data-url-adicionar="{{ url_for('carrinho.adicionar') }}"
+         data-url-alterar="{{ url_for('carrinho.alterar') }}"
+         data-url-remover="{{ url_for('carrinho.remover') }}">
+    <header class="flex items-center justify-between p-4 border-b">
+      <div>
+        <p class="text-sm text-gray-600">
+          Olá, {% if current_user.is_authenticated %}{{ current_user.nome.split()[0] }}{% else %}visitante{% endif %}
+        </p>
+        <h2 class="text-lg font-bold">Seu carrinho</h2>
+      </div>
+      <button type="button" id="carrinho-fechar" class="text-2xl leading-none px-2 hover:text-gray-600" aria-label="Fechar">&times;</button>
+    </header>
+    <div id="carrinho-conteudo" class="flex-1 flex flex-col min-h-0">
+      {% include "_carrinho_conteudo.html" %}
+    </div>
+  </aside>
+
+  <!-- Avisos (toasts) -->
+  <div id="toasts" class="fixed top-20 right-4 z-[60] space-y-2"></div>
+
+  <script src="{{ url_for('static', filename='js/carrinho.js') }}"></script>
 </body>
 </html>
