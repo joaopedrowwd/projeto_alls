@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Admin · Pedidos{% endblock %}
+
+{% set cores_status = {
+  'Pago': 'bg-blue-100 text-blue-800 border-blue-200',
+  'Em separação': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  'Enviado': 'bg-purple-100 text-purple-800 border-purple-200',
+  'Entregue': 'bg-green-100 text-green-800 border-green-200',
+  'Cancelado': 'bg-red-100 text-red-800 border-red-200'
+} %}
+
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-2xl font-bold">Gerenciar pedidos</h1>
+    <p class="text-sm text-gray-600">Altere o status e acompanhe os pedidos novos em tempo real.</p>
+  </div>
+
+  <form method="post" action="{{ url_for('admin.marcar_lidos') }}">
+    <button type="submit"
+            class="text-sm border border-gray-300 bg-white px-3.5 py-2 rounded hover:bg-gray-50 font-medium">
+      Marcar todos como lidos
+    </button>
+  </form>
+</div>
+
+<!-- Filtros de status -->
+<div class="flex flex-wrap gap-2 mb-6 text-sm">
+  <a href="{{ url_for('admin.pedidos') }}"
+     class="px-3 py-1.5 rounded border {{ 'bg-gray-900 text-white border-gray-900' if not status_filtro else 'bg-white text-gray-700 hover:bg-gray-100' }}">
+    Todos
+  </a>
+  <a href="{{ url_for('admin.pedidos', status='nao_lidos') }}"
+     class="px-3 py-1.5 rounded border {{ 'bg-red-600 text-white border-red-600' if status_filtro == 'nao_lidos' else 'bg-white text-gray-700 hover:bg-gray-100' }}">
+    Não lidos
+  </a>
+  {% for st in status_opcoes %}
+  <a href="{{ url_for('admin.pedidos', status=st) }}"
+     class="px-3 py-1.5 rounded border {{ 'bg-gray-900 text-white border-gray-900' if status_filtro == st else 'bg-white text-gray-700 hover:bg-gray-100' }}">
+    {{ st }}
+  </a>
+  {% endfor %}
+</div>
+
+{% if not pedidos %}
+  <div class="bg-white shadow rounded p-8 text-center text-gray-600">
+    Nenhum pedido encontrado para este filtro.
+  </div>
+{% else %}
+  <div class="space-y-4">
+    {% for pedido in pedidos %}
+    <article class="bg-white shadow rounded p-6 border-l-4 {{ 'border-red-500' if not pedido.lido_admin else 'border-transparent' }}">
+      <div class="flex flex-wrap items-start justify-between gap-4 border-b pb-4">
+        <div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <h2 class="text-lg font-bold">Pedido #{{ '%05d'|format(pedido.id) }}</h2>
+            {% if not pedido.lido_admin %}
+              <span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">NOVO</span>
+            {% endif %}
+            <span class="text-xs font-semibold px-2.5 py-0.5 rounded border {{ cores_status.get(pedido.status, 'bg-gray-100 text-gray-800 border-gray-200') }}">
+              {{ pedido.status }}
+            </span>
+          </div>
+          <p class="text-sm text-gray-600 mt-1">
+            <strong>Cliente:</strong> {{ pedido.usuario.nome if pedido.usuario else 'ID ' ~ pedido.usuario_id }}
+            ({{ pedido.usuario.email if pedido.usuario else '' }})
+            · {{ pedido.criado_em.strftime('%d/%m/%Y %H:%M') }}
+          </p>
+          <p class="text-sm text-gray-600">
+            <strong>Entrega ({{ pedido.entrega }}):</strong> {{ pedido.endereco }}
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:items-end gap-2">
+          <div class="sm:text-right">
+            <span class="text-xs text-gray-500 block">Total (frete {{ 'grátis' if pedido.frete == 0 else pedido.frete|brl }})</span>
+            <span class="text-xl font-bold">{{ pedido.total|brl }}</span>
+          </div>
+
+          <form method="post" action="{{ url_for('admin.alterar_status', pedido_id=pedido.id) }}"
+                class="flex items-center gap-2">
+            <select name="status" aria-label="Status do pedido"
+                    class="border border-gray-300 rounded px-2.5 py-1.5 text-sm bg-white">
+              {% for st in status_opcoes %}
+                <option value="{{ st }}" {% if pedido.status == st %}selected{% endif %}>{{ st }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit"
+                    class="bg-gray-900 text-white text-sm px-3.5 py-1.5 rounded hover:bg-gray-700 font-medium">
+              Salvar
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <ul class="divide-y text-sm mt-3">
+        {% for item in pedido.itens %}
+        <li class="py-2 flex justify-between gap-3">
+          <span>
+            {{ item.variante.produto.nome }} · {{ item.variante.cor }}
+            <span class="text-gray-500">
+              — {{ item.pacotes }} {{ 'pacote' if item.pacotes == 1 else 'pacotes' }}
+              ({{ item.pacotes * UNIDADES_POR_PACOTE }} un.) × {{ item.preco_pacote|brl }}
+            </span>
+          </span>
+          <span class="font-medium whitespace-nowrap">{{ (item.pacotes * item.preco_pacote)|brl }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </article>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

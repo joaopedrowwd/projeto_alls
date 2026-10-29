@@ -22,15 +22,13 @@ def create_app():
     from .admin import bp as admin_bp
     from .carrinho import bp as carrinho_bp
     from .cliente import bp as cliente_bp
+    from .models import UNIDADES_POR_PACOTE
     
     app.register_blueprint(carrinho_bp)
     app.register_blueprint(loja_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(cliente_bp)
-
-    from .models import UNIDADES_POR_PACOTE
-
     app.add_template_filter(brl, "brl")
     app.jinja_env.globals["COR_HEX"] = COR_HEX
     app.jinja_env.globals["UNIDADES_POR_PACOTE"] = UNIDADES_POR_PACOTE

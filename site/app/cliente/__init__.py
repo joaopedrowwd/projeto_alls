@@ -4,7 +4,7 @@ from flask import (Blueprint, abort, flash, redirect, render_template,
                    request, session, url_for)
 from flask_login import current_user, login_required
 
-from ..carrinho import CHAVE, detalhar
+from ..carrinho import detalhar, limpar as limpar_carrinho
 from ..extensions import db
 from ..models import FRETES, ItemPedido, Pedido, Variante
 
@@ -88,7 +88,7 @@ def checkout():
             db.session.add(pedido)
             db.session.commit()
 
-            session.pop(CHAVE, None)
+            limpar_carrinho()
             return redirect(url_for("cliente.pedido_confirmado", pedido_id=pedido.id))
 
         for erro in erros:

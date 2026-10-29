@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, render_template, request, session
+from flask_login import current_user
 
 from ..extensions import db
 from ..models import UNIDADES_POR_PACOTE, Variante
@@ -6,16 +7,55 @@ from ..models import UNIDADES_POR_PACOTE, Variante
 bp = Blueprint("carrinho", __name__, url_prefix="/carrinho")
 
 CHAVE = "carrinho"  # session["carrinho"] = {"<variante_id>": pacotes}
+CHAVE_DONO = "_carrinho_uid"
+_CARRINHOS_POR_USUARIO = {}  # {usuario_id: {"<variante_id>": pacotes}}
 
 
 def _ler():
+    uid_atual = current_user.id if current_user.is_authenticated else None
+    uid_sessao = session.get(CHAVE_DONO)
+
+    if uid_atual != uid_sessao:
+        # 1) Pessoa estava deslogada e acabou de fazer login: junta o carrinho anônimo com o salvo da conta
+        if uid_sessao is None and uid_atual is not None:
+            anonimo = dict(session.get(CHAVE, {}))
+            salvo = dict(_CARRINHOS_POR_USUARIO.get(uid_atual, {}))
+            for k, v in anonimo.items():
+                salvo[k] = salvo.get(k, 0) + int(v)
+            _CARRINHOS_POR_USUARIO[uid_atual] = salvo
+            session[CHAVE] = dict(salvo)
+        # 2) Trocou de usuário logado: carrega o carrinho do novo usuário
+        elif uid_atual is not None:
+            session[CHAVE] = dict(_CARRINHOS_POR_USUARIO.get(uid_atual, {}))
+        # 3) Fez logout: limpa o carrinho da tela (mas ele continua salvo em _CARRINHOS_POR_USUARIO)
+        else:
+            session.pop(CHAVE, None)
+
+        session[CHAVE_DONO] = uid_atual
+        session.modified = True
+
+    elif uid_atual is not None and CHAVE not in session and uid_atual in _CARRINHOS_POR_USUARIO:
+        # Logou em outra aba/navegador: recupera o carrinho salvo da conta
+        session[CHAVE] = dict(_CARRINHOS_POR_USUARIO[uid_atual])
+        session.modified = True
+
     return dict(session.get(CHAVE, {}))
 
 
 def _salvar(dados):
     session[CHAVE] = dados
+    uid_atual = current_user.id if current_user.is_authenticated else None
+    session[CHAVE_DONO] = uid_atual
+    if uid_atual is not None:
+        _CARRINHOS_POR_USUARIO[uid_atual] = dict(dados)
     session.modified = True
 
+
+def limpar():
+    session.pop(CHAVE, None)
+    if current_user.is_authenticated:
+        _CARRINHOS_POR_USUARIO.pop(current_user.id, None)
+    session.modified = True
 
 def detalhar():
     """Monta o carrinho a partir do banco (preços e estoque sempre atuais).
