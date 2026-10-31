@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-model = ChatGroq(model="openai/gpt-oss-20b", api_key=GROQ_API_KEY, temperature=0.2)
+model = ChatGroq(model="openai/gpt-oss-120b", api_key=GROQ_API_KEY, temperature=0.2)
 
 # Evolution API
 API = os.getenv("EVOLUTION_API", "http://localhost:8080")
